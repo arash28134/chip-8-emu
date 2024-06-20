@@ -12,8 +12,8 @@ CFLAGS := --std=c99 -Wall -lm -Iinclude $(SDL_CFLAGS)
 LFLAGS := $(SDL_LIBS) -lSDL2_mixer 
 
 # add source files here
-SRCS := src/main.c src/graphics.c src/rom.c src/sound.c
-HDRS := include/graphics.h include/rom.h include/sound.h
+SRCS := src/main.c src/graphics.c src/disassembler.c
+HDRS := include/graphics.h include/disassembler.h
 
 # generate names of object files
 OBJS := $(SRCS:.c=.o)

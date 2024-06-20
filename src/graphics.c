@@ -1,5 +1,4 @@
 #include "graphics.h"
-#include "sound.h"
 
 #include <SDL2/SDL.h>
 
