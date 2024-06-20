@@ -6,31 +6,17 @@ char* read_rom(char *filename) {
 	char *buffer;
 	unsigned long fileLen;
 
-	//Open file
+	// open file
 	file = fopen(filename, "rb");
 	if (!file)
 	{
-		fprintf(stderr, "Unable to open file %s", filename);
-		return NULL;
-	}
-	
-	//Get file length
-	fseek(file, 0, SEEK_END);
-	fileLen=ftell(file);
-	fseek(file, 0, SEEK_SET);
-
-	//Allocate memory
-	buffer=(char *)malloc(fileLen+1);
-	if (!buffer)
-	{
-		fprintf(stderr, "Memory error!");
-                                fclose(file);
+		fprintf(stderr, "Unable to open file %s\n", filename);
 		return NULL;
 	}
 
-	//Read file contents into buffer
-	fread(buffer, fileLen, 1, file);
-	fclose(file);
+	buffer = malloc(fileLen+0x200);
+	fread(buffer+0x200, fileLen, 1, f);
+	fclose(f);
 
 	return buffer;
 }

@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include "sound.h"
 
 #include <SDL2/SDL.h>
 
@@ -31,6 +32,8 @@ void init() {
 
 	for (int i = 0; i < SCREEN_WIDTH; i++)
 		pixels[i] = calloc(SCREEN_HEIGHT, sizeof(int));
+
+	//audio_init();
 }
 
 void draw(int x, int y, int val) {
@@ -46,6 +49,15 @@ void loop() {
             		switch (event.type) {
 				case SDL_QUIT:
 					running = 0;
+					break;
+				case SDL_KEYDOWN:
+					switch (event.key.keysym.sym) {
+
+					} break;
+				case SDL_KEYUP:
+					switch (event.key.keysym.sym) {
+
+					} break;
             		}
 		}
 
@@ -65,6 +77,7 @@ void loop() {
 void quit() {
 	SDL_DestroyRenderer(rend);
     	SDL_DestroyWindow(win);
+	//audio_quit();
     	SDL_Quit();
 
 	free(pixels);

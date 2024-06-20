@@ -6,14 +6,14 @@ SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LIBS := $(shell sdl2-config --libs)
 
 # set the compiler flags
-CFLAGS := -ggdb3 -O0 --std=c99 -Wall -lm -Iinclude $(SDL_CFLAGS) 
+CFLAGS := --std=c99 -Wall -lm -Iinclude $(SDL_CFLAGS)
 
 # linker flags
-LFLAGS := $(SDL_LIBS) 
+LFLAGS := $(SDL_LIBS) -lSDL2_mixer 
 
 # add source files here
-SRCS := src/graphics.c src/main.c src/rom.c
-HDRS := include/graphics.h include/rom.h
+SRCS := src/main.c src/graphics.c src/rom.c src/sound.c
+HDRS := include/graphics.h include/rom.h include/sound.h
 
 # generate names of object files
 OBJS := $(SRCS:.c=.o)
@@ -21,16 +21,16 @@ OBJS := $(SRCS:.c=.o)
 # name of executable
 EXEC := chip8 
 
-# default recipe
-all: $(EXEC)
-	
 # recipe for building the final executable
-$(EXEC): $(OBJS) Makefile
-	$(CC) $(OBJS) $(CFLAGS) $(LFLAGS) -o $@ 
+all: $(OBJS) Makefile
+	$(CC) $(OBJS) $(CFLAGS) $(LFLAGS) -o $(EXEC)
 
 # pattern rule for object files
 %.o: %.c $(HDRS)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+debug: $(OBJS) Makefile
+	$(CC) -g $(SRCS) $(CFLAGS) $(LFLAGS) -o $(EXEC)
 
 # recipe to clean the workspace
 clean:
