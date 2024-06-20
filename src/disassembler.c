@@ -2,39 +2,69 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
-void disassemble(uint8_t *codebuffer, int pc) {
-	uint8_t *code = &codebuffer[pc];
-	uint8_t firstnib = (code[0] >> 4);
+uint8_t pc; // program counter
+uint16_t I; // index register
+uint8_t regs[16]; // 16 8-bit general-purpose registers; V0, V1,..., VF
+uint8_t memory[4096]; // 4kb memory
+uint16_t stack[16]; // 16 levels stack
+uint8_t sp; // stack pointer
+uint8_t fontset[FONTSET_SIZE] = {
+		0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+		0x20, 0x60, 0x20, 0x20, 0x70, // 1
+		0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+		0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+		0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+		0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+		0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+		0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+		0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+		0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+		0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+		0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+		0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+		0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+		0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+		0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+	};
 
-	printf("%04x %02x %02x ", pc, code[0], code[1]);    
-	switch (firstnib)    
+void load_rom(char *filename) {
+	FILE *f = fopen(filename, "rb");    
+	if (f == NULL)    
 	{    
-		case 0x00: printf("0 not handled yet"); break;    
-		case 0x01: printf("1 not handled yet"); break;    
-		case 0x02: printf("2 not handled yet"); break;    
-		case 0x03: printf("3 not handled yet"); break;    
-		case 0x04: printf("4 not handled yet"); break;    
-		case 0x05: printf("5 not handled yet"); break;    
-		case 0x06:    
-			{    
-				uint8_t reg = code[0] & 0x0f;    
-				printf("%-10s V%01X,#$%02x", "MVI", reg, code[1]);    
-			}    
-			break;    
-		case 0x07: printf("7 not handled yet"); break;    
-		case 0x08: printf("8 not handled yet"); break;    
-		case 0x09: printf("9 not handled yet"); break;    
-		case 0x0a:    
-			{    
-				uint8_t addresshi = code[0] & 0x0f;    
-				printf("%-10s I,#$%01x%02x", "MVI", addresshi, code[1]);    
-			}    
-			break;    
-		case 0x0b: printf("b not handled yet"); break;    
-		case 0x0c: printf("c not handled yet"); break;    
-		case 0x0d: printf("d not handled yet"); break;    
-		case 0x0e: printf("e not handled yet"); break;    
-		case 0x0f: printf("f not handled yet"); break;    
+		printf("error: Couldn't open %s\n", filename);    
+		exit(1);    
+	}    
+
+	// get the file size    
+	fseek(f, 0L, SEEK_END);    
+	int fsize = ftell(f);    
+	fseek(f, 0L, SEEK_SET);    
+
+	unsigned char *buffer = malloc(fsize);    
+	fread(buffer, fsize, 1, f);    
+	fclose(f);
+
+	// load file buffer into memory
+	for (long i = 0; i < fsize; ++i) {
+		memory[START_ADDR + i] = buffer[i];
 	}
+
+	free(buffer);
+
+	// load fonts into memory
+	for (unsigned int i = 0; i < FONTSET_SIZE; ++i) {
+		memory[FONTSET_START_ADDR + i] = fontset[i];
+	}
+
+	srand(time(0));
+}
+
+void disassemble() {
+}
+
+unsigned char randbyte() {
+	return (unsigned char)(rand() % 256);
 }
