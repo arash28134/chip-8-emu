@@ -74,6 +74,7 @@ void cycle() {
 
 	pc += 2; // next instruction
 
+	// decode and execute current opcode
 	switch (opcode & 0xF000) {
 		case 0x0000:
 			switch (opcode & 0x000F) {
@@ -470,6 +471,13 @@ void cycle() {
 			printf("Unkown opcode: 0x%X\n", opcode);
 		break;
 	}
+
+	// decrement sound and delay timers if they have been set
+	if (delay_timer > 0)
+		--delay_timer;
+	if (sound_timer > 0)
+		// beep
+		--sound_timer;
 }
 
 uint8_t randbyte() {

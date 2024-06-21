@@ -2,6 +2,7 @@
 #include "disassembler.h"
 
 #include <SDL2/SDL.h>
+#include <sys/time.h>
 
 SDL_Renderer* rend;
 SDL_Window* win;
@@ -45,6 +46,9 @@ void init(int windowWidth, int windowHeight, int delay) {
 void loop() {
 	int running = 1;
 	SDL_Event event;
+
+	Uint64 start, end, deltatime, time_accumulator;
+	Uint64 threshold = 1 / 60.0;
 
 	while (running) {
 		while (SDL_PollEvent(&event)) {
@@ -225,13 +229,21 @@ void loop() {
 			}
 		}
 
-		cycle();
+		deltatime = end - start;
+		start = SDL_GetPerformanceCounter();
+		time_accumulator += deltatime;
+		if (time_accumulator >= threshold) {
+			cycle();
+			time_accumulator = 0;
+		}
+		end = SDL_GetPerformanceCounter();
+
 		SDL_UpdateTexture(texture, NULL, videobuf, VIDEO_WIDTH * sizeof(uint32_t));
 
 		SDL_RenderClear(rend);
 		SDL_RenderCopy(rend, texture, NULL, NULL);	
 		SDL_RenderPresent(rend);
-		SDL_Delay(vid_delay);
+		// SDL_Delay(vid_delay);
         }
 }
 
