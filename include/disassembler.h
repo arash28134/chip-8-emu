@@ -7,6 +7,6 @@
 #define FONTSET_SIZE 80 // 16 sprites from 0 to F, each 5 bytes: 16 * 5
 
 void load_rom(char *filename);
-void disassemble(uint8_t *codebuffer);
+void cycle();
 
 unsigned char randbyte();
