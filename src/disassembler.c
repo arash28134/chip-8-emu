@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <string.h>
 
 uint16_t pc; // program counter
 uint16_t I; // index register
@@ -90,115 +91,188 @@ void cycle() {
 			}
 			break;
 		case 0x1000: // 1NNN: Jump to address NNN
+		{
 			uint16_t NNN = opcode & 0x0FFF;
 			pc = NNN;
 			break;
+		}
 		case 0x2000: // 2NNN: Call subroutine at NNN
+		{
 			++sp;
 			stack[sp] = pc;
 			pc = opcode & 0x0FFF;
 			break;
+		}
 		case 0x3000: // 3XNN
+		{
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t NN = opcode & 0x00FF;
 			if (regs[Vx] == NN)
 				++pc;
 			break;
+		}
 		case 0x4000: // 4XNN
+		{
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t NN = opcode & 0x00FF;
 			if (regs[Vx] != NN)
 				++pc;
 			break;
+		}
 		case 0x5000: // 5XY0
+		{
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t Vy = (opcode & 0x00F0) >> 4;
 			if (regs[Vx] == regs[Vy])
 				++pc;
 			break;
+		}
 		case 0x6000: // 6XNN: Set VX to NN
+		{
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t NN = opcode & 0x00FF;
 			regs[Vx] = NN;
 			break;
+		}
 		case 0x7000: // 7XNN: Add NN to VX
+		{
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t NN = opcode & 0x00FF;
 			regs[Vx] += NN;
 			break;
+		}
 		case 0x8000:
 			switch (opcode & 0x000F) {
 				case 0x0000:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] = regs[Vy];
 					break;
+				}
 				case 0x0001:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] |= regs[Vy];
 					break;
+				}
 				case 0x0002:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] &= regs[Vy];
 					break;
+				}
 				case 0x0003:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] ^= regs[Vy];
 					break;
+				}
 				case 0x0004: //
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					break;
+				}
 				case 0x0005: //
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					break;
+				}
 				case 0x0006: //
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					break;
+				}
 				case 0x0007: //
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					break;
+				}
 				case 0x000E:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					break;
+				}
 			}
 			break;
 		case 0x9000: // 9XY0
+		{
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t Vy = (opcode & 0x00F0) >> 4;
 			if (regs[Vx] != regs[Vy])
 				++pc;
 			break;
+		}
 		case 0xA000: // ANNN: Set I to the address NNN
+		{
 			uint16_t NNN = opcode & 0x0FFF;
 			I = NNN;
 			printf("I: %X\n", I);
 			break;
+		}
 		case 0xB000: // BNNN: Jump to the address NNN plus V0
+		{
 			uint16_t NNN = opcode & 0x0FFF;
 			pc = NNN + regs[0];
 			break;
+		}
 		case 0xC000: // CXNN
+		{
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t NN = opcode & 0x00FF;
 			regs[Vx] = randbyte() & NN;
 			break;
+		}
 		case 0xD000: // DXYN: Draw sprite at VX, VY
+		{
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t Vy = (opcode & 0x00F0) >> 4;
+			uint8_t height = opcode & 0x000F;
+
+			// Wrap if going beyond screen boundaries
+			uint8_t xPos = regs[Vx] % VIDEO_WIDTH;
+			uint8_t yPos = regs[Vy] % VIDEO_HEIGHT;
+
+			regs[0xF] = 0;
+
+			for (unsigned int row = 0; row < height; ++row)
+			{
+				uint8_t spriteByte = memory[I + row];
+
+				for (unsigned int col = 0; col < 8; ++col)
+				{
+					uint8_t spritePixel = spriteByte & (0x80 >> col);
+					uint32_t* screenPixel = &videobuf[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
+
+					// Sprite pixel is on
+					if (spritePixel)
+					{
+						// Screen pixel also on - collision
+						if (*screenPixel == 0xFFFFFFFF)
+						{
+							regs[0xF] = 1;
+						}
+
+						// Effectively XOR with the sprite pixel
+						*screenPixel ^= 0xFFFFFFFF;
+					}
+				}
+			}
 			break;
+		}
 		case 0xE000: //
 			switch (opcode & 0x000F) {
 				case 0x000E:
-
 					break;
 				case 0x0001:
-					
 					break;
 				default:
 					printf("Unknown opcode: %X\n", opcode);
@@ -208,35 +282,49 @@ void cycle() {
 		case 0xF000:
 			switch (opcode & 0x000F) {
 				case 0x0007:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					regs[Vx] = delay_timer;
 					break;
+				}
 				case 0x000A: //
+					break;
 				case 0x0005:
 					switch (opcode & 0x00F0) {
 						case 0x0010:
+						{
 							uint8_t Vx = (opcode & 0x0F00) >> 8;
 							delay_timer = regs[Vx];
 							break;
+						}
 						case 0x0050: //
+							break;
 						case 0x0060: //
+							break;
 						default:
 							printf("Unknown opcode: %X\n", opcode);
 							break;
 					}
 				case 0x0008:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					sound_timer = regs[Vx];
 					break;
+				}
 				case 0x000E:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					I += regs[Vx];
 					break;
+				}
 				case 0x0009:
+				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
-					I = memory[FONT_START_ADDR + regs[Vx]]
+					I = memory[FONTSET_START_ADDR + regs[Vx]];
 					break;
+				}
 				case 0x0003: //
+					break;
 				default:
 					printf("Unknown opcode: %X\n", opcode);
 					break;
