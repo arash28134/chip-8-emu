@@ -7,7 +7,9 @@ SDL_Renderer* rend;
 SDL_Window* win;
 SDL_Texture* texture;
 
-void init(int windowWidth, int windowHeight) {
+int vid_delay;
+
+void init(int windowWidth, int windowHeight, int delay) {
 	// returns zero on success else non-zero
     	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         	printf("error initializing SDL: %s\n", SDL_GetError());
@@ -36,6 +38,8 @@ void init(int windowWidth, int windowHeight) {
 		SDL_DestroyWindow(win);
 		SDL_Quit();
 	}
+
+	vid_delay = delay;
 }
 
 void loop() {
@@ -65,7 +69,7 @@ void loop() {
 		SDL_RenderClear(rend);
         	SDL_RenderCopy(rend, texture, NULL, NULL);	
 		SDL_RenderPresent(rend);
-		SDL_Delay(16);
+		SDL_Delay(vid_delay);
         }
 }
 
