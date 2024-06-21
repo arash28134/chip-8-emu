@@ -85,6 +85,7 @@ void cycle() {
 					pc = stack[sp];
 				default: // 0NNN: Not necessary for most ROMs
 					printf("Skipping 0x%X...\n", opcode);
+					break;
 
 			}
 			break;
@@ -201,24 +202,44 @@ void cycle() {
 					break;
 				default:
 					printf("Unknown opcode: %X\n", opcode);
+					break;
 			}
 			break;
 		case 0xF000:
 			switch (opcode & 0x000F) {
 				case 0x0007:
-				case 0x000A:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					regs[Vx] = delay_timer;
+					break;
+				case 0x000A: //
 				case 0x0005:
-					switch () {
-						
+					switch (opcode & 0x00F0) {
+						case 0x0010:
+							uint8_t Vx = (opcode & 0x0F00) >> 8;
+							delay_timer = regs[Vx];
+							break;
+						case 0x0050: //
+						case 0x0060: //
 						default:
 							printf("Unknown opcode: %X\n", opcode);
+							break;
 					}
 				case 0x0008:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					sound_timer = regs[Vx];
+					break;
 				case 0x000E:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					I += regs[Vx];
+					break;
 				case 0x0009:
-				case 0x0003:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					I = memory[FONT_START_ADDR + regs[Vx]]
+					break;
+				case 0x0003: //
 				default:
 					printf("Unknown opcode: %X\n", opcode);
+					break;
 			}
 			break;
 		default:
