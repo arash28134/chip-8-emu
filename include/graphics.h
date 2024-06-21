@@ -1,9 +1,6 @@
 #pragma once
 
-#define SCREEN_WIDTH 64
-#define SCREEN_HEIGHT 32
-
-void init(); 
-void draw(int x, int y, int val);
+void init(int windowWidth, int windowHeight); 
+void update_buffer();
 void loop();
 void quit();

@@ -11,8 +11,8 @@ uint16_t I; // index register
 uint8_t regs[16]; // 16 8-bit general-purpose registers; V0, V1,..., VF
 uint8_t memory[4096]; // 4kb memory
 uint16_t stack[16]; // 16 levels stack
-uint32_t videobuf[64 * 32]; // 64 pixels wide and 32 pixels high (32-bit to make using with SDL easier)
 uint8_t sp; // stack pointer
+uint32_t videobuf[64 * 32]; // 64 pixels wide and 32 pixels high (32-bit to make using with SDL easier)
 uint8_t delay_timer, sound_timer;
 uint16_t opcode; // chip8 opcodes are each 2 bytes long
 uint8_t fontset[FONTSET_SIZE] = {
@@ -84,6 +84,7 @@ void cycle() {
 					--sp; 	// top of the stack has the address of one instruction past the one that called the subroutine,
 						// so we need to decrement stack pointer and put that instruction address into pc 
 					pc = stack[sp];
+					break;
 				default: // 0NNN: Not necessary for most ROMs
 					printf("Skipping 0x%X...\n", opcode);
 					break;
@@ -98,9 +99,10 @@ void cycle() {
 		}
 		case 0x2000: // 2NNN: Call subroutine at NNN
 		{
-			++sp;
 			stack[sp] = pc;
-			pc = opcode & 0x0FFF;
+			++sp;
+			uint16_t NNN = opcode & 0x0FFF;
+			pc = NNN;
 			break;
 		}
 		case 0x3000: // 3XNN
@@ -195,7 +197,7 @@ void cycle() {
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					break;
 				}
-				case 0x000E:
+				case 0x000E: //
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;

@@ -1,42 +1,41 @@
 #include "graphics.h"
+#include "disassembler.h"
 
 #include <SDL2/SDL.h>
 
 SDL_Renderer* rend;
 SDL_Window* win;
+SDL_Texture* texture;
 
-int **pixels;
-
-void init() {
+void init(int windowWidth, int windowHeight) {
 	// returns zero on success else non-zero
-    	if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+    	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         	printf("error initializing SDL: %s\n", SDL_GetError());
 	}
 
 	win = SDL_CreateWindow("Chip8 Emulator", // creates a win
                                        SDL_WINDOWPOS_CENTERED,
                                        SDL_WINDOWPOS_CENTERED,
-                                       SCREEN_WIDTH, SCREEN_HEIGHT, 0);
-
+                                       windowWidth, windowHeight, 0);
+	
 	Uint32 render_flags = SDL_RENDERER_ACCELERATED;
 	rend = SDL_CreateRenderer(win, -1, render_flags);
-	
+
 	if (!rend) {
         	SDL_Log("Could not create rend: %s", SDL_GetError());
         	SDL_DestroyWindow(win);
         	SDL_Quit();
     	}	
 
-	pixels = (int**)malloc(SCREEN_WIDTH * sizeof(int*));
-
-	for (int i = 0; i < SCREEN_WIDTH; i++)
-		pixels[i] = calloc(SCREEN_HEIGHT, sizeof(int));
-
-	//audio_init();
-}
-
-void draw(int x, int y, int val) {
-	pixels[x][y] = val;
+	texture = SDL_CreateTexture(rend, SDL_PIXELFORMAT_RGB888,
+                                             SDL_TEXTUREACCESS_STREAMING,
+			     VIDEO_WIDTH, VIDEO_HEIGHT);
+	if (!texture) {
+		fprintf(stderr, "Could not create texture: %s\n", SDL_GetError());
+		SDL_DestroyRenderer(rend);
+		SDL_DestroyWindow(win);
+		SDL_Quit();
+	}
 }
 
 void loop() {
@@ -60,24 +59,33 @@ void loop() {
             		}
 		}
 
-		// render each element of **pixels
-		for (int x = 0; x < SCREEN_WIDTH; x++)
-			for (int y = 0; y < SCREEN_HEIGHT; y++) {
-				int val = pixels[x][y] * 255;
+		cycle();
+		update_buffer();
 
-				SDL_SetRenderDrawColor(rend, val, val, val, 255);
-				SDL_RenderDrawPoint(rend, x, y);
-			}
-
+		SDL_RenderClear(rend);
+        	SDL_RenderCopy(rend, texture, NULL, NULL);	
 		SDL_RenderPresent(rend);
+		SDL_Delay(16);
         }
 }
 
-void quit() {
-	SDL_DestroyRenderer(rend);
-    	SDL_DestroyWindow(win);
-	//audio_quit();
-    	SDL_Quit();
+void update_buffer() {
+	uint32_t pixels[VIDEO_WIDTH * VIDEO_HEIGHT];
+	for (int y = 0; y < VIDEO_HEIGHT; ++y) {
+		for (int x = 0; x < VIDEO_WIDTH; ++x) {
+			uint8_t pixel = videobuf[x + y * VIDEO_WIDTH];
+			uint32_t color = pixel ? 0xFFFFFFFF : 0x00000000; // White for on, black for off
+			pixels[x + y * VIDEO_WIDTH] = color;
+		}
+	}
 
-	free(pixels);
+	SDL_UpdateTexture(texture, NULL, pixels, VIDEO_WIDTH * sizeof(uint32_t));
+}
+
+void quit() {
+	SDL_DestroyTexture(texture);
+	SDL_DestroyRenderer(rend);
+	SDL_DestroyWindow(win);
+	//audio_quit();
+	SDL_Quit();
 }

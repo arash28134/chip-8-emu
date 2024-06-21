@@ -8,6 +8,8 @@
 #define VIDEO_WIDTH 64
 #define VIDEO_HEIGHT 32
 
+extern uint32_t videobuf[64 * 32]; // 64 pixels wide and 32 pixels high (32-bit to make using with SDL easier)
+
 void load_rom(char *filename);
 void cycle();
 
