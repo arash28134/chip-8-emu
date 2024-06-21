@@ -9,4 +9,4 @@
 void load_rom(char *filename);
 void cycle();
 
-unsigned char randbyte();
+uint8_t randbyte();

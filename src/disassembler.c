@@ -10,6 +10,7 @@ uint16_t I; // index register
 uint8_t regs[16]; // 16 8-bit general-purpose registers; V0, V1,..., VF
 uint8_t memory[4096]; // 4kb memory
 uint16_t stack[16]; // 16 levels stack
+uint32_t videobuf[64 * 32]; // 64 pixels wide and 32 pixels high (32-bit to make using with SDL easier)
 uint8_t sp; // stack pointer
 uint8_t delay_timer, sound_timer;
 uint16_t opcode; // chip8 opcodes are each 2 bytes long
@@ -75,9 +76,13 @@ void cycle() {
 		case 0x0000:
 			switch (opcode & 0x000F) {
 				case 0x0000: // 00E0: Clear the screen
+					memset(videobuf, 0, sizeof(videobuf));
 					printf("Screen cleared.\n");
 					break;
 				case 0x000E: // 00EE: Return from a subroutine
+					--sp; 	// top of the stack has the address of one instruction past the one that called the subroutine,
+						// so we need to decrement stack pointer and put that instruction address into pc 
+					pc = stack[sp];
 				default: // 0NNN: Not necessary for most ROMs
 					printf("Skipping 0x%X...\n", opcode);
 
@@ -88,20 +93,87 @@ void cycle() {
 			pc = NNN;
 			break;
 		case 0x2000: // 2NNN: Call subroutine at NNN
+			++sp;
+			stack[sp] = pc;
+			pc = opcode & 0x0FFF;
 			break;
 		case 0x3000: // 3XNN
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t NN = opcode & 0x00FF;
+			if (regs[Vx] == NN)
+				++pc;
 			break;
 		case 0x4000: // 4XNN
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t NN = opcode & 0x00FF;
+			if (regs[Vx] != NN)
+				++pc;
 			break;
 		case 0x5000: // 5XY0
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t Vy = (opcode & 0x00F0) >> 4;
+			if (regs[Vx] == regs[Vy])
+				++pc;
 			break;
 		case 0x6000: // 6XNN: Set VX to NN
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t NN = opcode & 0x00FF;
+			regs[Vx] = NN;
 			break;
 		case 0x7000: // 7XNN: Add NN to VX
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t NN = opcode & 0x00FF;
+			regs[Vx] += NN;
 			break;
 		case 0x8000:
+			switch (opcode & 0x000F) {
+				case 0x0000:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					regs[Vx] = regs[Vy];
+					break;
+				case 0x0001:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					regs[Vx] |= regs[Vy];
+					break;
+				case 0x0002:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					regs[Vx] &= regs[Vy];
+					break;
+				case 0x0003:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					regs[Vx] ^= regs[Vy];
+					break;
+				case 0x0004: //
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					break;
+				case 0x0005: //
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					break;
+				case 0x0006: //
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					break;
+				case 0x0007: //
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					break;
+				case 0x000E:
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					break;
+			}
 			break;
 		case 0x9000: // 9XY0
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t Vy = (opcode & 0x00F0) >> 4;
+			if (regs[Vx] != regs[Vy])
+				++pc;
 			break;
 		case 0xA000: // ANNN: Set I to the address NNN
 			uint16_t NNN = opcode & 0x0FFF;
@@ -109,14 +181,45 @@ void cycle() {
 			printf("I: %X\n", I);
 			break;
 		case 0xB000: // BNNN: Jump to the address NNN plus V0
+			uint16_t NNN = opcode & 0x0FFF;
+			pc = NNN + regs[0];
 			break;
 		case 0xC000: // CXNN
+			uint8_t Vx = (opcode & 0x0F00) >> 8;
+			uint8_t NN = opcode & 0x00FF;
+			regs[Vx] = randbyte() & NN;
 			break;
 		case 0xD000: // DXYN: Draw sprite at VX, VY
 			break;
-		case 0xE000:
+		case 0xE000: //
+			switch (opcode & 0x000F) {
+				case 0x000E:
+
+					break;
+				case 0x0001:
+					
+					break;
+				default:
+					printf("Unknown opcode: %X\n", opcode);
+			}
 			break;
 		case 0xF000:
+			switch (opcode & 0x000F) {
+				case 0x0007:
+				case 0x000A:
+				case 0x0005:
+					switch () {
+						
+						default:
+							printf("Unknown opcode: %X\n", opcode);
+					}
+				case 0x0008:
+				case 0x000E:
+				case 0x0009:
+				case 0x0003:
+				default:
+					printf("Unknown opcode: %X\n", opcode);
+			}
 			break;
 		default:
 			printf("Unkown opcode: 0x%X\n", opcode);
@@ -124,6 +227,6 @@ void cycle() {
 	}
 }
 
-unsigned char randbyte() {
-	return (unsigned char)(rand() % 256);
+uint8_t randbyte() {
+	return (uint8_t)(rand() % 256);
 }
