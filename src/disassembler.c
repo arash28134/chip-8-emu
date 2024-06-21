@@ -73,6 +73,8 @@ void cycle() {
 	opcode = (memory[pc] << 8) | memory[pc + 1]; 
 
 	pc += 2; // next instruction
+	
+	printf("0x%X\n", opcode);
 
 	// decode and execute current opcode
 	switch (opcode & 0xF000) {
@@ -80,15 +82,13 @@ void cycle() {
 			switch (opcode & 0x000F) {
 				case 0x0000: // 00E0: Clear the screen
 					memset(videobuf, 0, sizeof(videobuf));
-					printf("Screen cleared.\n");
 					break;
 				case 0x000E: // 00EE: Return from a subroutine
-					--sp; 	// top of the stack has the address of one instruction past the one that called the subroutine,
-						// so we need to decrement stack pointer and put that instruction address into pc 
 					pc = stack[sp];
+					sp--;
 					break;
 				default: // 0NNN: Not necessary for most ROMs
-					printf("Skipping 0x%X...\n", opcode);
+					printf("Skipping 0x%X...HEY\n", opcode);
 					break;
 
 			}
@@ -101,8 +101,8 @@ void cycle() {
 		}
 		case 0x2000: // 2NNN: Call subroutine at NNN
 		{
+			sp += 1;
 			stack[sp] = pc;
-			++sp;
 			uint16_t NNN = opcode & 0x0FFF;
 			pc = NNN;
 			break;
