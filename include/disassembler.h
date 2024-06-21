@@ -9,6 +9,7 @@
 #define VIDEO_HEIGHT 32
 
 extern uint32_t videobuf[64 * 32]; // 64 pixels wide and 32 pixels high (32-bit to make using with SDL easier)
+extern uint8_t keypad[16];
 
 void load_rom(char *filename);
 void cycle();

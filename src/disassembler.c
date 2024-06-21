@@ -8,11 +8,12 @@
 
 uint16_t pc; // program counter
 uint16_t I; // index register
-uint8_t regs[16]; // 16 8-bit general-purpose registers; V0, V1,..., VF
+uint8_t regs[16]; // 16 8-bit general-purpose regs; V0, V1,..., VF
 uint8_t memory[4096]; // 4kb memory
 uint16_t stack[16]; // 16 levels stack
 uint8_t sp; // stack pointer
 uint32_t videobuf[64 * 32]; // 64 pixels wide and 32 pixels high (32-bit to make using with SDL easier)
+uint8_t keypad[16]; // 16 keys, 0 through F
 uint8_t delay_timer, sound_timer;
 uint16_t opcode; // chip8 opcodes are each 2 bytes long
 uint8_t fontset[FONTSET_SIZE] = {
@@ -71,7 +72,7 @@ void load_rom(char *filename) {
 void cycle() {
 	opcode = (memory[pc] << 8) | memory[pc + 1]; 
 
-	pc += 2;
+	pc += 2; // next instruction
 
 	switch (opcode & 0xF000) {
 		case 0x0000:
@@ -173,34 +174,58 @@ void cycle() {
 					regs[Vx] ^= regs[Vy];
 					break;
 				}
-				case 0x0004: //
+				case 0x0004:
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
+
+					uint16_t sum = regs[Vx] + regs[Vy];
+					if (sum > 255)
+						regs[0xF] = 1;
+					else
+						regs[0xF] = 0;
+					regs[Vx] += regs[Vy];
 					break;
 				}
-				case 0x0005: //
+				case 0x0005:
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
+
+					if (regs[Vx] > regs[Vy])
+						regs[0xF] = 1;
+					else
+						regs[0xF] = 0;
+					regs[Vx] -= regs[Vy];
 					break;
 				}
-				case 0x0006: //
+				case 0x0006: 
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
-					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					
+					regs[0xF] = (regs[Vx] & 0x1);
+					regs[Vx] >>= 1;
 					break;
 				}
-				case 0x0007: //
+				case 0x0007: 
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					
+					if (regs[Vy] > regs[Vx])
+						regs[0xF] = 1;
+					else
+						regs[0xF] = 0;
+
+					regs[Vx] = (regs[Vy] - regs[Vx]);	
 					break;
 				}
-				case 0x000E: //
+				case 0x000E:
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
-					uint8_t Vy = (opcode & 0x00F0) >> 4;
+					
+					regs[0xF] = (regs[Vx] & 0x80) >> 7;
+					regs[Vx] <<= 1;
 					break;
 				}
 			}
@@ -270,12 +295,24 @@ void cycle() {
 			}
 			break;
 		}
-		case 0xE000: //
+		case 0xE000: 
 			switch (opcode & 0x000F) {
 				case 0x000E:
+				{
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					
+					if (keypad[regs[Vx]])
+						pc += 2;
 					break;
+				}
 				case 0x0001:
+				{
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					
+					if (!keypad[regs[Vx]])
+						pc += 2;
 					break;
+				}
 				default:
 					printf("Unknown opcode: %X\n", opcode);
 					break;
@@ -289,8 +326,78 @@ void cycle() {
 					regs[Vx] = delay_timer;
 					break;
 				}
-				case 0x000A: //
-					break;
+				case 0x000A: 
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+
+					if (keypad[0])
+					{
+						regs[Vx] = 0;
+					}
+					else if (keypad[1])
+					{
+						regs[Vx] = 1;
+					}
+					else if (keypad[2])
+					{
+						regs[Vx] = 2;
+					}
+					else if (keypad[3])
+					{
+						regs[Vx] = 3;
+					}
+					else if (keypad[4])
+					{
+						regs[Vx] = 4;
+					}
+					else if (keypad[5])
+					{
+						regs[Vx] = 5;
+					}
+					else if (keypad[6])
+					{
+						regs[Vx] = 6;
+					}
+					else if (keypad[7])
+					{
+						regs[Vx] = 7;
+					}
+					else if (keypad[8])
+					{
+						regs[Vx] = 8;
+					}
+					else if (keypad[9])
+					{
+						regs[Vx] = 9;
+					}
+					else if (keypad[10])
+					{
+						regs[Vx] = 10;
+					}
+					else if (keypad[11])
+					{
+						regs[Vx] = 11;
+					}
+					else if (keypad[12])
+					{
+						regs[Vx] = 12;
+					}
+					else if (keypad[13])
+					{
+						regs[Vx] = 13;
+					}
+					else if (keypad[14])
+					{
+						regs[Vx] = 14;
+					}
+					else if (keypad[15])
+					{
+						regs[Vx] = 15;
+					}
+					else
+					{
+						pc -= 2;
+					}
+				break;
 				case 0x0005:
 					switch (opcode & 0x00F0) {
 						case 0x0010:
@@ -299,10 +406,22 @@ void cycle() {
 							delay_timer = regs[Vx];
 							break;
 						}
-						case 0x0050: //
+						case 0x0050:
+						{
+							uint8_t Vx = (opcode & 0x0F00) >> 8;
+
+							for (uint8_t i = 0; i <= Vx; ++i)
+								memory[I + i] = regs[i];
 							break;
-						case 0x0060: //
+						}
+						case 0x0060: 
+						{
+							uint8_t Vx = (opcode & 0x0F00) >> 8;
+
+							for (uint8_t i = 0; i <= Vx; ++i)
+								regs[i] = memory[I + i];
 							break;
+						}
 						default:
 							printf("Unknown opcode: %X\n", opcode);
 							break;
@@ -322,19 +441,34 @@ void cycle() {
 				case 0x0009:
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
-					I = memory[FONTSET_START_ADDR + regs[Vx]];
+					I = FONTSET_START_ADDR + (5 * regs[Vx]);
 					break;
 				}
-				case 0x0003: //
+				case 0x0003: 
+				{
+					uint8_t Vx = (opcode & 0x0F00) >> 8;
+					uint8_t value = regs[Vx];
+
+					// Ones-place
+					memory[I + 2] = value % 10;
+					value /= 10;
+
+					// Tens-place
+					memory[I + 1] = value % 10;
+					value /= 10;
+
+					// Hundreds-place
+					memory[I] = value % 10;
 					break;
+				}
 				default:
 					printf("Unknown opcode: %X\n", opcode);
 					break;
 			}
-			break;
+		break;
 		default:
 			printf("Unkown opcode: 0x%X\n", opcode);
-			break;
+		break;
 	}
 }
 

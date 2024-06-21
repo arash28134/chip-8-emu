@@ -54,37 +54,199 @@ void loop() {
 					break;
 				case SDL_KEYDOWN:
 					switch (event.key.keysym.sym) {
+						case SDLK_ESCAPE:
+							{
+							running = 0;
+						} break;
 
-					} break;
+						case SDLK_x:
+							{
+								keypad[0] = 1;
+						} break;
+
+						case SDLK_1:
+							{
+								keypad[1] = 1;
+						} break;
+
+						case SDLK_2:
+							{
+								keypad[2] = 1;
+						} break;
+
+						case SDLK_3:
+							{
+								keypad[3] = 1;
+						} break;
+
+						case SDLK_q:
+							{
+								keypad[4] = 1;
+						} break;
+
+						case SDLK_w:
+							{
+								keypad[5] = 1;
+						} break;
+
+						case SDLK_e:
+							{
+								keypad[6] = 1;
+						} break;
+
+						case SDLK_a:
+							{
+								keypad[7] = 1;
+						} break;
+
+						case SDLK_s:
+							{
+								keypad[8] = 1;
+						} break;
+
+						case SDLK_d:
+							{
+								keypad[9] = 1;
+						} break;
+
+						case SDLK_z:
+							{
+								keypad[0xA] = 1;
+						} break;
+
+						case SDLK_c:
+							{
+								keypad[0xB] = 1;
+						} break;
+
+						case SDLK_4:
+							{
+								keypad[0xC] = 1;
+						} break;
+
+						case SDLK_r:
+							{
+								keypad[0xD] = 1;
+						} break;
+
+						case SDLK_f:
+							{
+								keypad[0xE] = 1;
+						} break;
+
+						case SDLK_v:
+							{
+								keypad[0xF] = 1;
+						} break;
+				} break;
 				case SDL_KEYUP:
 					switch (event.key.keysym.sym) {
+						case SDLK_x:
+							{
+								keypad[0] = 1;
+						} break;
 
-					} break;
-            		}
+						case SDLK_1:
+							{
+								keypad[1] = 1;
+						} break;
+
+						case SDLK_2:
+							{
+								keypad[2] = 1;
+						} break;
+
+						case SDLK_3:
+							{
+								keypad[3] = 1;
+						} break;
+
+						case SDLK_q:
+							{
+								keypad[4] = 1;
+						} break;
+
+						case SDLK_w:
+							{
+								keypad[5] = 1;
+						} break;
+
+						case SDLK_e:
+							{
+								keypad[6] = 1;
+						} break;
+
+						case SDLK_a:
+							{
+								keypad[7] = 1;
+						} break;
+
+						case SDLK_s:
+							{
+								keypad[8] = 1;
+						} break;
+
+						case SDLK_d:
+							{
+								keypad[9] = 1;
+						} break;
+
+						case SDLK_z:
+							{
+								keypad[0xA] = 1;
+						} break;
+
+						case SDLK_c:
+							{
+								keypad[0xB] = 1;
+						} break;
+
+						case SDLK_4:
+							{
+								keypad[0xC] = 1;
+						} break;
+
+						case SDLK_r:
+							{
+								keypad[0xD] = 1;
+						} break;
+
+						case SDLK_f:
+							{
+								keypad[0xE] = 1;
+						} break;
+
+						case SDLK_v:
+							{
+								keypad[0xF] = 1;
+						} break;
+
+				} break;
+			}
 		}
 
 		cycle();
-		update_buffer();
+		SDL_UpdateTexture(texture, NULL, videobuf, VIDEO_WIDTH * sizeof(uint32_t));
 
 		SDL_RenderClear(rend);
-        	SDL_RenderCopy(rend, texture, NULL, NULL);	
+		SDL_RenderCopy(rend, texture, NULL, NULL);	
 		SDL_RenderPresent(rend);
 		SDL_Delay(vid_delay);
         }
 }
 
-void update_buffer() {
-	uint32_t pixels[VIDEO_WIDTH * VIDEO_HEIGHT];
-	for (int y = 0; y < VIDEO_HEIGHT; ++y) {
-		for (int x = 0; x < VIDEO_WIDTH; ++x) {
-			uint8_t pixel = videobuf[x + y * VIDEO_WIDTH];
-			uint32_t color = pixel ? 0xFFFFFFFF : 0x00000000; // White for on, black for off
-			pixels[x + y * VIDEO_WIDTH] = color;
-		}
-	}
-
-	SDL_UpdateTexture(texture, NULL, pixels, VIDEO_WIDTH * sizeof(uint32_t));
-}
+// void update_buffer() {
+// 	uint32_t pixels[VIDEO_WIDTH * VIDEO_HEIGHT];
+// 	for (int y = 0; y < VIDEO_HEIGHT; ++y) {
+// 		for (int x = 0; x < VIDEO_WIDTH; ++x) {
+// 			uint8_t pixel = videobuf[x + y * VIDEO_WIDTH];
+// 			uint32_t color = pixel ? 0xFFFFFFFF : 0x00000000; // White for on, black for off
+// 			pixels[x + y * VIDEO_WIDTH] = color;
+// 		}
+// 	}
+//
+// 	SDL_UpdateTexture(texture, NULL, pixels, VIDEO_WIDTH * sizeof(uint32_t));
+// }
 
 void quit() {
 	SDL_DestroyTexture(texture);
