@@ -1,5 +1,6 @@
 #include "graphics.h"
 #include "disassembler.h"
+#include "audio.h"
 
 #include <SDL2/SDL.h>
 #include <sys/time.h>
@@ -12,8 +13,8 @@ float vid_frequency;
 
 void init(int windowWidth, int windowHeight, float frequency) {
 	// returns zero on success else non-zero
-    	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-        	printf("error initializing SDL: %s\n", SDL_GetError());
+	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
+		printf("error initializing SDL: %s\n", SDL_GetError());
 	}
 
 	win = SDL_CreateWindow("Chip8 Emulator", // creates a win
@@ -39,6 +40,8 @@ void init(int windowWidth, int windowHeight, float frequency) {
 		SDL_DestroyWindow(win);
 		SDL_Quit();
 	}
+
+	audio_init();
 
 	vid_frequency = frequency;
 }
@@ -264,6 +267,6 @@ void quit() {
 	SDL_DestroyTexture(texture);
 	SDL_DestroyRenderer(rend);
 	SDL_DestroyWindow(win);
-	//audio_quit();
+	audio_quit();
 	SDL_Quit();
 }

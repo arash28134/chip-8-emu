@@ -1,4 +1,5 @@
 #include "disassembler.h"
+#include "audio.h"
 
 #include <stdint.h>
 #include <stdio.h>
@@ -478,9 +479,12 @@ void cycle() {
 	// decrement sound and delay timers if they have been set
 	if (delay_timer > 0)
 		--delay_timer;
-	if (sound_timer > 0)
-		// beep
+	if (sound_timer > 0) {
+		beep(1);
 		--sound_timer;
+	}
+	else
+		beep(0);
 }
 
 uint8_t randbyte() {
