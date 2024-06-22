@@ -8,9 +8,9 @@ SDL_Renderer* rend;
 SDL_Window* win;
 SDL_Texture* texture;
 
-int vid_delay;
+float vid_frequency;
 
-void init(int windowWidth, int windowHeight, int delay) {
+void init(int windowWidth, int windowHeight, float frequency) {
 	// returns zero on success else non-zero
     	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
         	printf("error initializing SDL: %s\n", SDL_GetError());
@@ -40,7 +40,7 @@ void init(int windowWidth, int windowHeight, int delay) {
 		SDL_Quit();
 	}
 
-	vid_delay = delay;
+	vid_frequency = frequency;
 }
 
 void loop() {
@@ -48,7 +48,7 @@ void loop() {
 	SDL_Event event;
 
 	Uint64 start, end, deltatime, time_accumulator;
-	Uint64 threshold = 1 / 60.0;
+	Uint64 threshold = 1 / vid_frequency;
 
 	while (running) {
 		while (SDL_PollEvent(&event)) {
