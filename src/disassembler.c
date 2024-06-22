@@ -71,11 +71,14 @@ void load_rom(char *filename) {
 
 void cycle() {
 	opcode = (memory[pc] << 8) | memory[pc + 1]; 
-
+	
+	printf("0x%X PC: %X, I: %X\n", opcode, pc, I);
+	for (int i = 0; i <= 16; i++)
+		printf("V%d: %X ", i, regs[i]);
+	printf("\n");
+	
 	pc += 2; // next instruction
 	
-	printf("0x%X\n", opcode);
-
 	// decode and execute current opcode
 	switch (opcode & 0xF000) {
 		case 0x0000:
@@ -112,7 +115,7 @@ void cycle() {
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t NN = opcode & 0x00FF;
 			if (regs[Vx] == NN)
-				++pc;
+				pc += 2;
 			break;
 		}
 		case 0x4000: // 4XNN
@@ -120,7 +123,7 @@ void cycle() {
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t NN = opcode & 0x00FF;
 			if (regs[Vx] != NN)
-				++pc;
+				pc += 2;
 			break;
 		}
 		case 0x5000: // 5XY0
@@ -128,7 +131,7 @@ void cycle() {
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t Vy = (opcode & 0x00F0) >> 4;
 			if (regs[Vx] == regs[Vy])
-				++pc;
+				pc += 2;
 			break;
 		}
 		case 0x6000: // 6XNN: Set VX to NN
@@ -236,7 +239,7 @@ void cycle() {
 			uint8_t Vx = (opcode & 0x0F00) >> 8;
 			uint8_t Vy = (opcode & 0x00F0) >> 4;
 			if (regs[Vx] != regs[Vy])
-				++pc;
+				pc += 2;
 			break;
 		}
 		case 0xA000: // ANNN: Set I to the address NNN

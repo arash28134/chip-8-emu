@@ -10,7 +10,7 @@ int main(int argc, char **argv){
 	int delay = strtol(argv[3], &endptr, 10);
 	load_rom(argv[1]);    
 
-	init(VIDEO_WIDTH * video_scale, VIDEO_HEIGHT * video_scale, delay);
+	init(VIDEO_WIDTH * video_scale, VIDEO_HEIGHT * video_scale, 10);
 	loop();
 	quit();
 
