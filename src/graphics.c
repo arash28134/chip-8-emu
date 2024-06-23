@@ -9,9 +9,10 @@ SDL_Renderer* rend;
 SDL_Window* win;
 SDL_Texture* texture;
 
-float vid_frequency;
+int clock_rate;
+int ms_per_cycle;
 
-void init(int windowWidth, int windowHeight, float frequency) {
+void init(int windowWidth, int windowHeight, int rate) {
 	// returns zero on success else non-zero
 	if (SDL_Init(SDL_INIT_VIDEO) != 0) {
 		printf("error initializing SDL: %s\n", SDL_GetError());
@@ -43,15 +44,16 @@ void init(int windowWidth, int windowHeight, float frequency) {
 
 	audio_init();
 
-	vid_frequency = frequency;
+	ms_per_cycle = 1000 / rate;
 }
 
 void loop() {
 	int running = 1;
 	SDL_Event event;
 
-	Uint64 start, end, deltatime, time_accumulator;
-	Uint64 threshold = 1 / vid_frequency;
+	Uint32 last_time = SDL_GetTicks();
+    	Uint32 current_time, elapsed_time;
+	int cycles_to_run;
 
 	while (running) {
 		while (SDL_PollEvent(&event)) {
@@ -232,36 +234,23 @@ void loop() {
 			}
 		}
 
-		deltatime = end - start;
-		start = SDL_GetPerformanceCounter();
-		time_accumulator += deltatime;
-		if (time_accumulator >= threshold) {
-			cycle();
-			time_accumulator = 0;
+		current_time = SDL_GetTicks();
+        	elapsed_time = current_time - last_time;
+
+		if (elapsed_time >= ms_per_cycle) {
+			cycles_to_run = elapsed_time / ms_per_cycle;
+			for (int i = 0; i < cycles_to_run; i++)
+				cycle();
+			last_time = current_time;
 		}
-		end = SDL_GetPerformanceCounter();
 
 		SDL_UpdateTexture(texture, NULL, videobuf, VIDEO_WIDTH * sizeof(uint32_t));
 
 		SDL_RenderClear(rend);
 		SDL_RenderCopy(rend, texture, NULL, NULL);	
 		SDL_RenderPresent(rend);
-		// SDL_Delay(vid_delay);
         }
 }
-
-// void update_buffer() {
-// 	uint32_t pixels[VIDEO_WIDTH * VIDEO_HEIGHT];
-// 	for (int y = 0; y < VIDEO_HEIGHT; ++y) {
-// 		for (int x = 0; x < VIDEO_WIDTH; ++x) {
-// 			uint8_t pixel = videobuf[x + y * VIDEO_WIDTH];
-// 			uint32_t color = pixel ? 0xFFFFFFFF : 0x00000000; // White for on, black for off
-// 			pixels[x + y * VIDEO_WIDTH] = color;
-// 		}
-// 	}
-//
-// 	SDL_UpdateTexture(texture, NULL, pixels, VIDEO_WIDTH * sizeof(uint32_t));
-// }
 
 void quit() {
 	SDL_DestroyTexture(texture);
