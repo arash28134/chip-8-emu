@@ -151,35 +151,35 @@ void cycle() {
 		}
 		case 0x8000:
 			switch (opcode & 0x000F) {
-				case 0x0000:
+				case 0x0000: // 8XY0
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] = regs[Vy];
 					break;
 				}
-				case 0x0001:
+				case 0x0001: // 8XY1
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] |= regs[Vy];
 					break;
 				}
-				case 0x0002:
+				case 0x0002: // 8XY2
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] &= regs[Vy];
 					break;
 				}
-				case 0x0003:
+				case 0x0003: // 8XY3
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
 					regs[Vx] ^= regs[Vy];
 					break;
 				}
-				case 0x0004:
+				case 0x0004: // 8XY4
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
@@ -192,7 +192,7 @@ void cycle() {
 					regs[Vx] += regs[Vy];
 					break;
 				}
-				case 0x0005:
+				case 0x0005: // 8XY5
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
@@ -204,7 +204,7 @@ void cycle() {
 					regs[Vx] -= regs[Vy];
 					break;
 				}
-				case 0x0006: 
+				case 0x0006: // 8XY6
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					
@@ -212,7 +212,7 @@ void cycle() {
 					regs[Vx] >>= 1;
 					break;
 				}
-				case 0x0007: 
+				case 0x0007: // 8XY7
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t Vy = (opcode & 0x00F0) >> 4;
@@ -225,7 +225,7 @@ void cycle() {
 					regs[Vx] = (regs[Vy] - regs[Vx]);	
 					break;
 				}
-				case 0x000E:
+				case 0x000E: // 8XYE
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					
@@ -302,7 +302,7 @@ void cycle() {
 		}
 		case 0xE000: 
 			switch (opcode & 0x000F) {
-				case 0x000E:
+				case 0x000E: // EX9E
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					
@@ -310,7 +310,7 @@ void cycle() {
 						pc += 2;
 					break;
 				}
-				case 0x0001:
+				case 0x0001: // EXA1
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					
@@ -325,13 +325,13 @@ void cycle() {
 			break;
 		case 0xF000:
 			switch (opcode & 0x000F) {
-				case 0x0007:
+				case 0x0007: // FX07
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					regs[Vx] = delay_timer;
 					break;
 				}
-				case 0x000A: 
+				case 0x000A: // FX0A
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 
 					if (keypad[0])
@@ -405,13 +405,13 @@ void cycle() {
 				break;
 				case 0x0005:
 					switch (opcode & 0x00F0) {
-						case 0x0010:
+						case 0x0010: // FX15
 						{
 							uint8_t Vx = (opcode & 0x0F00) >> 8;
 							delay_timer = regs[Vx];
 							break;
 						}
-						case 0x0050:
+						case 0x0050: // FX55
 						{
 							uint8_t Vx = (opcode & 0x0F00) >> 8;
 
@@ -419,7 +419,7 @@ void cycle() {
 								memory[I + i] = regs[i];
 							break;
 						}
-						case 0x0060: 
+						case 0x0060: // FX65
 						{
 							uint8_t Vx = (opcode & 0x0F00) >> 8;
 
@@ -431,25 +431,25 @@ void cycle() {
 							printf("Unknown opcode: %X\n", opcode);
 							break;
 					}
-				case 0x0008:
+				case 0x0008: // FX18
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					sound_timer = regs[Vx];
 					break;
 				}
-				case 0x000E:
+				case 0x000E: // FX1E
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					I += regs[Vx];
 					break;
 				}
-				case 0x0009:
+				case 0x0009: // FX29
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					I = FONTSET_START_ADDR + (5 * regs[Vx]);
 					break;
 				}
-				case 0x0003: 
+				case 0x0003: // FX33
 				{
 					uint8_t Vx = (opcode & 0x0F00) >> 8;
 					uint8_t value = regs[Vx];
