@@ -242,13 +242,15 @@ void loop() {
 			for (int i = 0; i < cycles_to_run; i++)
 				cycle();
 			last_time = current_time;
+
+
+
+			SDL_UpdateTexture(texture, NULL, videobuf, VIDEO_WIDTH * sizeof(uint32_t));
+
+			SDL_RenderClear(rend);
+			SDL_RenderCopy(rend, texture, NULL, NULL);	
+			SDL_RenderPresent(rend);
 		}
-
-		SDL_UpdateTexture(texture, NULL, videobuf, VIDEO_WIDTH * sizeof(uint32_t));
-
-		SDL_RenderClear(rend);
-		SDL_RenderCopy(rend, texture, NULL, NULL);	
-		SDL_RenderPresent(rend);
         }
 }
 
