@@ -4,11 +4,11 @@ CHIP-8 is an interpretted programming language developed by Joseph Weisbecker in
 This is a fairly complete implementation of a CHIP-8 virtual machine however currently the sound seems to behave weird in some ROMs and the timing is wrong. (Frequency parameter basically does nothing)
 
 ```
-$ ./chip8 roms/PONG2 20 10.0
+$ ./chip8 roms/PONG2 20 500
 ```
 ![image](https://github.com/arash28134/chip-8-emu/assets/74412308/7032cb17-6a43-4193-9c6b-902f64a888d5)
 ```
-$ ./chip8 roms/INVADERS 20 10.0
+$ ./chip8 roms/INVADERS 20 500
 ```
 ![image](https://github.com/arash28134/chip-8-emu/assets/74412308/3156f001-9103-4e86-8204-73fb3573bed6)
 
@@ -23,7 +23,7 @@ $ make
 ```
 Run:
 ```
-$ ./chip8 <ROM> <Video Scale> <Frequency>
+$ ./chip8 <rom file> <video scale> <clock rate>
 ```
 Public domain ROMs/Test ROMs I found and used for developing the emulator are included in `roms/` and `test_roms/`.
 ## References
